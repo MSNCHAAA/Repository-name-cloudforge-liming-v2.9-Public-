@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>CloudForge 雲匠　三層黎明清境水庫模擬圖（A3橫式展示版）</title>
+<style>
+:root{
+  --bg:#081021;--panel:#101a36;--border:#1e2b52;--txt:#eaf2ff;
+  --on:#ff4d5e;--rest:#43e06a;--fault:#ffd14a;--pink:#ff8ad6;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:linear-gradient(90deg,#0b1222,#0a1528);
+  color:var(--txt);font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+header{
+  padding:18px;text-align:center;background:#0a1428cc;
+  font-weight:700;font-size:20px;letter-spacing:2px;
+}
+main{
+  display:flex;justify-content:space-around;align-items:flex-start;
+  flex-wrap:nowrap;gap:18px;margin:10px;overflow-x:auto;
+}
+.card{
+  background:var(--panel);border:1px solid var(--border);
+  border-radius:16px;padding:12px;width:32%;min-width:360px;
+  box-shadow:0 0 10px rgba(0,0,0,.4);
+}
+h2{margin:8px 0 10px;font-size:16px;text-align:center;}
+.pumps{display:flex;justify-content:space-between;gap:8px;margin-bottom:10px;}
+.pump{
+  background:#111a36;border:1px solid var(--border);border-radius:10px;
+  padding:8px;text-align:center;flex:1;min-width:100px;
+}
+.ledbar{display:flex;justify-content:center;gap:6px;margin-bottom:6px;}
+.led{width:10px;height:10px;border-radius:50%;background:#364061;opacity:.45}
+.led.on{opacity:1;box-shadow:0 0 8px currentColor}
+.led.red{background:var(--on);color:var(--on)}
+.led.green{background:var(--rest);color:var(--rest)}
+.led.yellow{background:var(--fault);color:var(--fault)}
+.blink{animation:blink .7s linear infinite}
+@keyframes blink{0%{opacity:1}50%{opacity:.35}100%{opacity:1}}
+button{
+  margin:2px;padding:6px 8px;border-radius:6px;border:1px solid #778;
+  background:#1a2444;color:var(--txt);font-size:12px;cursor:pointer;
+}
+.water-wrap{display:flex;flex-direction:column;align-items:center;margin-top:4px;}
+.water{
+  width:26px;height:160px;border-radius:14px;background:#0b1432;
+  display:flex;flex-direction:column;justify-content:flex-end;align-items:center;
+  padding:5px;border:1px solid #21305a;
+}
+.segment{width:16px;height:18%;border-radius:8px;background:#243050;opacity:.25}
+.segment.on{opacity:1;box-shadow:0 0 8px currentColor}
+.segment.green{background:#38e48f;color:#38e48f}
+.segment.yellow{background:var(--fault);color:var(--fault)}
+.segment.pink{background:var(--pink);color:var(--pink)}
+.segment.red{background:var(--on);color:var(--on)}
+.percent{font-size:13px;text-align:center;margin-top:4px}
+.alerts{display:flex;justify-content:center;gap:20px;margin-bottom:8px;}
+.alert{display:flex;align-items:center;gap:6px;font-size:12px;opacity:.35}
+.alert .dot{width:10px;height:10px;border-radius:50%;background:#444}
+.alert.red .dot{background:var(--on)}
+.alert.yellow .dot{background:var(--fault)}
+.alert.on{opacity:1}
+footer{text-align:center;font-size:13px;opacity:.7;margin:18px 0}
+.logo{position:fixed;right:10px;bottom:10px;opacity:.6}
+</style>
+</head>
+<body>
+<header>CloudForge 雲匠　三層黎明清境水庫模擬圖（A3橫式展示版）</header>
+
+<main id="levels"></main>
+
+<footer>© CloudForge 雲匠・黎明清境系統 模擬展示 v2.9</footer>
+
+<script>
+let waterData = { low: 20, mid: 60, high: 90 };
+
+const layers = [
+  { key:'high', name:'高層水庫（觀天下A）' },
+  { key:'mid',  name:'中層水庫（57巷中繼站）' },
+  { key:'low',  name:'低層水庫（車子路）' }
+];
+
+const container = document.getElementById('levels');
+
+layers.forEach(L=>{
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const title = document.createElement('h2');
+  title.textContent = L.name;
+
+  const alerts = document.createElement('div');
+  alerts.className = 'alerts';
+  alerts.innerHTML = `
+    <div class="alert red" id="alertR-${L.key}"><div class="dot"></div>大紅燈（溢水）</div>
+    <div class="alert yellow" id="alertY-${L.key}"><div class="dot"></div>大黃燈（缺水）</div>
+  `;
+
+  const pumps = document.createElement('div');
+  pumps.className = 'pumps';
+
+  for(let p=1;p<=3;p++){
+    const div=document.createElement('div');
+    div.className='pump';
+    div.innerHTML=`
+      <div class="ledbar">
+        <div class="led" id="ledR-${L.key}-${p}"></div>
+        <div class="led" id="ledG-${L.key}-${p}"></div>
+        <div class="led" id="ledY-${L.key}-${p}"></div>
+      </div>
+      <b>馬達 ${p}</b><br>
+      <button onclick="setPump('${L.key}',${p},'on')">啟動</button>
+      <button onclick="setPump('${L.key}',${p},'rest')">休息</button>
+      <button onclick="setPump('${L.key}',${p},'fault')">故障</button>`;
+    pumps.appendChild(div);
+  }
+
+  const waterWrap = document.createElement('div');
+  waterWrap.className='water-wrap';
+  waterWrap.innerHTML=`
+    <div class="water" id="water-${L.key}">
+      ${[5,4,3,2,1].map(()=>'<div class="segment"></div>').join('')}
+    </div>
+    <div class="percent" id="pct-${L.key}">0%</div>
+  `;
+
+  card.appendChild(title);
+  card.appendChild(alerts);
+  card.appendChild(pumps);
+  card.appendChild(waterWrap);
+  container.appendChild(card);
+});
+
+function bandColor(p){
+  if(p>=100) return 'red';
+  if(p>=90)  return 'pink';
+  if(p>=80)  return 'yellow';
+  if(p>=40)  return 'green';
+  return 'yellow';
+}
+
+function renderWater(layerKey){
+  const p = Math.max(0, Math.min(100, Number(waterData[layerKey]||0)));
+  const col = document.getElementById(`water-${layerKey}`);
+  const leds = col.querySelectorAll('.segment');
+  leds.forEach(seg => seg.className = 'segment');
+
+  const c = bandColor(p);
+  const lit = Math.min(5, Math.ceil(Math.min(p,100)/20));
+  for(let i=0;i<lit;i++){ leds[i].classList.add('on', c); }
+
+  document.getElementById(`pct-${layerKey}`).textContent = p.toFixed(0)+'%';
+  document.getElementById(`alertR-${layerKey}`).classList.toggle('on', p>=90);
+  document.getElementById(`alertY-${layerKey}`).classList.toggle('on', p<=40);
+}
+
+function setPump(layerKey, n, mode){
+  const r = document.getElementById(`ledR-${layerKey}-${n}`);
+  const g = document.getElementById(`ledG-${layerKey}-${n}`);
+  const y = document.getElementById(`ledY-${layerKey}-${n}`);
+  [r,g,y].forEach(el => el.className = 'led');
+  if(mode==='on')   r.classList.add('led','red','on');
+  if(mode==='rest') g.classList.add('led','green','on');
+  if(mode==='fault')y.classList.add('led','yellow','on','blink');
+}
+
+window.updateFromESP = function(payload){
+  ['low','mid','high'].forEach(k=>{
+    if(payload[k]!==undefined) waterData[k] = Number(payload[k]);
+    renderWater(k);
+  });
+};
+
+['low','mid','high'].forEach(renderWater);
+</script>
+</body>
+</html>
