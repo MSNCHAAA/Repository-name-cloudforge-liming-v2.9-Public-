@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620">
+  <rect x="20" y="20" width="320" height="580" fill="#f7f7f9" stroke="#444"/>
+  <text x="30" y="50" font-family="Segoe UI, Noto Sans TC" font-size="18">ESP32 NodeMCU-32S（示意）</text>
+  <rect x="680" y="40" width="280" height="140" fill="#eef7ff" stroke="#2c7be5"/>
+  <text x="690" y="65" font-family="Segoe UI, Noto Sans TC" font-size="16">SH1106 OLED (I²C)</text>
+  <text x="690" y="90" font-family="Segoe UI, Noto Sans TC" font-size="14">VCC → 3.3V / 5V</text>
+  <text x="690" y="110" font-family="Segoe UI, Noto Sans TC" font-size="14">GND → GND</text>
+  <text x="690" y="130" font-family="Segoe UI, Noto Sans TC" font-size="14">SDA → GPIO21</text>
+  <text x="690" y="150" font-family="Segoe UI, Noto Sans TC" font-size="14">SCL → GPIO22</text>
+  <rect x="680" y="200" width="280" height="130" fill="#fff8e6" stroke="#f0ad4e"/>
+  <text x="690" y="225" font-family="Segoe UI, Noto Sans TC" font-size="16">LED 指示燈</text>
+  <text x="690" y="250" font-family="Segoe UI, Noto Sans TC" font-size="14">黃（缺水）→ GPIO25</text>
+  <text x="690" y="270" font-family="Segoe UI, Noto Sans TC" font-size="14">紅（溢水）→ GPIO26</text>
+  <text x="690" y="290" font-family="Segoe UI, Noto Sans TC" font-size="14">藍（心跳）→ GPIO2（板載）</text>
+  <rect x="680" y="350" width="280" height="160" fill="#e9f7ef" stroke="#5cb85c"/>
+  <text x="690" y="375" font-family="Segoe UI, Noto Sans TC" font-size="16">水位感測（ADC 模擬）</text>
+  <text x="690" y="400" font-family="Segoe UI, Noto Sans TC" font-size="14">下層 → GPIO32</text>
+  <text x="690" y="420" font-family="Segoe UI, Noto Sans TC" font-size="14">中層 → GPIO33</text>
+  <text x="690" y="440" font-family="Segoe UI, Noto Sans TC" font-size="14">上層 → GPIO34</text>
+  <text x="690" y="460" font-family="Segoe UI, Noto Sans TC" font-size="14">乾接點：缺水→GPIO23，溢水→GPIO19</text>
+</svg>
